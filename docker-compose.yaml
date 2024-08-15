@@ -1,0 +1,57 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    restart: always
+    environment:
+      NEXT_PUBLIC_BACKEND_URL: http://localhost:5735
+    ports:
+      - 5734:3000
+    volumes:
+      - ./frontend:/app
+    networks:
+      - expose
+  backend:
+    container_name: bain-challange-backend
+    command: sh -c "npm run db:migrate && npm run start:dev"
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    restart: always
+    environment:
+      PORT: 3001
+      FRONTEND_URL: http://localhost:5734
+      DATABASE_URL: postgresql://distanceApiDatabaseUser:superSecretDistanceApiDatabasePassword@database/distanceApiDatabaseName
+      NODE_ENV: development
+      NAME: distance-api
+      DISTANCE_API_URL: http://router.project-osrm.org
+      COORDINATES_API_URL: https://nominatim.openstreetmap.org
+      COORDINATE_SERVICE_SLEEP_TIME_MS: 5000
+    ports:
+      - 5735:3001
+    volumes:
+      - ./backend:/app
+    networks:
+      - database
+      - expose
+    depends_on:
+      - database
+  database:
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-distanceApiDatabaseUser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-superSecretDistanceApiDatabasePassword}
+      POSTGRES_DB: ${POSTGRES_DB:-distanceApiDatabaseName}
+    networks:
+      - database
+    volumes:
+      - postgres_storage:/var/lib/postgresql/data
+
+networks:
+  database:
+  expose:
+    external: true
+volumes:
+  postgres_storage: {}
