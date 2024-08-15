@@ -33,5 +33,9 @@ http://localhost:5734
 ## Resources
 
 - Postgres Database
-- Frontend service
-- Backend service
+- [Backend](./backend/README.md)
+- [Frontend](./frontend/README.md)
+
+## License
+
+[GPL-3.0](./LICENSE)
